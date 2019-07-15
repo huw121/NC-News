@@ -10,7 +10,7 @@
     "test": "mocha spec/app.spec.js",
     "migrate-latest": "knex migrate:latest",
     "migrate-rollback": "knex migrate:rollback",
-    "migrate-down-up": "npm run migrate-rollback && npm run migrate:latest"
+    "migrate-down-up": "npm run migrate-rollback && npm run migrate-latest"
   },
   "repository": {
     "type": "git",
