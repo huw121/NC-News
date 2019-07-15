@@ -50,6 +50,25 @@ describe('formatDates', () => {
   });
 });
 
-describe('makeRefObj', () => {});
+describe('makeRefObj', () => {
+  it('returns an empty object when passed an empty array', () => {
+    const input = [];
+    const actual = makeRefObj(input);
+    const expected = {};
+    expect(actual).to.eql(expected);
+  });
+  it('takes a one object array, a prop and a val and turns it into an appropriate lookup', () => {
+    const input = [{name: 'huw', age: 12}];
+    const actual = makeRefObj(input, 'name', 'age');
+    const expected = {huw: 12};
+    expect(actual).to.eql(expected);
+  });
+  it('takes a multiple object array, a prop and a val and turns it into an appropriate lookup', () => {
+    const input = [{name: 'huw', arms: '12'}, {name: 'bob', arms: '2'}];
+    const actual = makeRefObj(input, 'name', 'arms');
+    const expected = {huw: '12', bob: '2'};
+    expect(actual).to.eql(expected);
+  });
+});
 
 describe('formatComments', () => {});

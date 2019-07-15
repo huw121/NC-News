@@ -26,6 +26,9 @@ exports.seed = function (connection) {
                 .returning('*')
             })
             .then(articleRows => {
+              const articleRef = makeRefObj(articleRows, 'author', 'article_id');
+              const formattedComments = formatComments(commentData, articleRef);
+              
               /* 
         
               Your comment data is currently in the incorrect format and will violate your SQL schema. 
@@ -34,10 +37,6 @@ exports.seed = function (connection) {
               
               You will need to write and test the provided makeRefObj and formatComments utility functions to be able insert your comment data.
               */
-
-              const articleRef = makeRefObj(articleRows);
-              const formattedComments = formatComments(commentData, articleRef);
-              return connection('comments').insert(formattedComments);
             });
         })
     });
