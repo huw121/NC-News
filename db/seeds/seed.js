@@ -19,16 +19,11 @@ exports.seed = function (connection) {
           const topicsInsertions = connection('topics').insert(topicData).returning('*');
           const usersInsertions = connection('users').insert(userData).returning('*');
           return Promise.all([topicsInsertions, usersInsertions])
-            .then((mystery) => {
-              console.log(mystery)
-              /* 
-              
-              Your article data is currently in the incorrect format and will violate your SQL schema. 
-              
-              You will need to write and test the provided formatDate utility function to be able insert your article data.
-        
-              Your comment insertions will depend on information from the seeded articles, so make sure to return the data after it's been seeded.
-              */
+            .then(([topicRows, userRows]) => {
+              const formattedArticleData = formatDates(articleData);
+              return connection('articles')
+                .insert(formattedArticleData)
+                .returning('*')
             })
             .then(articleRows => {
               /* 

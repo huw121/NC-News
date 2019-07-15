@@ -1,8 +1,8 @@
 exports.formatDates = list => {
   return list.map(object => {
-    const { timestamp, ...restOfObject } = object;
-    return timestamp ? {
-      timestamp: new Date(timestamp),
+    const { created_at, ...restOfObject } = object;
+    return created_at ? {
+      created_at: new Date(created_at),
       ...restOfObject
     } : { ...restOfObject }
   });

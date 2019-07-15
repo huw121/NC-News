@@ -28,17 +28,24 @@ describe('formatDates', () => {
       const actual = formatDates(input);
       expect(actual[0]).to.have.all.keys(Object.keys(obj));
     });
-    it('must convert the timestamp property to a javascript date object', () => {
-      const obj = {timestamp: 1542284514171};
+    it('must convert the created_at property to a javascript date object', () => {
+      const obj = {created_at: 1542284514171};
       const input = [obj];
       const actual = formatDates(input);
-      expect(actual[0].timestamp instanceof Date ).to.be.true;
+      expect(actual[0].created_at instanceof Date ).to.be.true;
+    });
+    it('must not mutate the original input', () => {
+      const obj = {created_at: 1542284514171};
+      const input = [obj];
+      const copyInput = [...input];
+      formatDates(input);
+      expect(copyInput).to.eql(input);
     });
   });
   it('must do for an array of many objects, what it does for one', () => {
-    const input = [{title: "hi", timestamp: 1542284514171}, {body: 'hello my name is', timestamp: 1542284514999}];
+    const input = [{title: "hi", created_at: 1542284514171}, {body: 'hello my name is', created_at: 1542284514999}];
     const actual = formatDates(input);
-    const expected = [{title: "hi", timestamp: new Date(1542284514171)}, {body: 'hello my name is', timestamp: new Date(1542284514999)}];
+    const expected = [{title: "hi", created_at: new Date(1542284514171)}, {body: 'hello my name is', created_at: new Date(1542284514999)}];
     expect(actual).to.eql(expected);
   });
 });
