@@ -16,27 +16,21 @@ exports.seed = function (connection) {
         .migrate
         .latest()
         .then(() => {
-          const topicsInsertions = connection('topics').insert(topicData).returning('*');
-          const usersInsertions = connection('users').insert(userData).returning('*');
+          const topicsInsertions = connection('topics').insert(topicData);
+          const usersInsertions = connection('users').insert(userData);
           return Promise.all([topicsInsertions, usersInsertions])
-            .then(([topicRows, userRows]) => {
+            .then(() => {
               const formattedArticleData = formatDates(articleData);
               return connection('articles')
                 .insert(formattedArticleData)
                 .returning('*')
             })
             .then(articleRows => {
-              const articleRef = makeRefObj(articleRows, 'author', 'article_id');
+              const articleRef = makeRefObj(articleRows, 'title', 'article_id');
               const formattedComments = formatComments(commentData, articleRef);
-              
-              /* 
-        
-              Your comment data is currently in the incorrect format and will violate your SQL schema. 
-        
-              Keys need renaming, values need changing, and most annoyingly, your comments currently only refer to the title of the article they belong to, not the id. 
-              
-              You will need to write and test the provided makeRefObj and formatComments utility functions to be able insert your comment data.
-              */
+              return connection('comments')
+                .insert(formattedComments)
+                .returning('*')
             });
         })
     });
