@@ -23,6 +23,17 @@ describe('/api', () => {
           );
         });
     });
+    it('responds 405 and a message when an invalid method is attempted', () => {
+      const invalidMethods = ['patch', 'put', 'delete'];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)[method]('/api/topics')
+          .expect(405)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('method not allowed');
+          })
+      })
+      return Promise.all(methodPromises);
+    });
   });
   it('responds status 404 and an error message when a request is made on an invalid route', () => {
     return request(app)
@@ -53,6 +64,17 @@ describe('/api', () => {
         .then(({ body: { message } }) => {
           expect(message).to.equal('user not found');
         })
+    });
+    it('responds 405 and a message when an invalid method is attempted', () => {
+      const invalidMethods = ['patch', 'put', 'delete'];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)[method]('/api/users/1')
+          .expect(405)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('method not allowed');
+          })
+      })
+      return Promise.all(methodPromises);
     });
   });
   describe('/api/articles/:article_id', () => {
@@ -111,7 +133,7 @@ describe('/api', () => {
           })
       });
     });
-    describe.only('PATCH', () => {
+    describe('PATCH', () => {
       it('responds status 201 with the patched article', () => {
         return request(app)
           .patch('/api/articles/1')
@@ -157,6 +179,58 @@ describe('/api', () => {
             expect(message).to.equal('invalid input syntax for integer: "NaN"');
           })
       });
+      it('responds 400 and a message when request is made with an invalid property', () => {
+        return request(app)
+          .patch('/api/articles/1')
+          .send({ invalid_prop: 1 })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('invalid request');
+          })
+      });
+      it('responds 400 and a message when request is made without inc_votes', () => {
+        return request(app)
+          .patch('/api/articles/1')
+          .send({})
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('invalid request');
+          })
+      });
+      it('respond ignores additional properties in the request', () => {
+        return request(app)
+          .patch('/api/articles/1')
+          .send({
+            inc_votes: 1,
+            legs: 12,
+            author: 'huw'
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article).to.have.all.keys(
+              'author',
+              'title',
+              'article_id',
+              'body',
+              'topic',
+              'created_at',
+              'votes',
+            )
+            expect(article.votes).to.equal(101);
+            expect(article.author).to.equal('butter_bridge');
+          });
+      });
+    });
+    it('responds 405 and a message when an invalid method is attempted', () => {
+      const invalidMethods = ['put', 'delete'];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)[method]('/api/articles/1')
+          .expect(405)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('method not allowed');
+          })
+      })
+      return Promise.all(methodPromises);
     });
   });
 });

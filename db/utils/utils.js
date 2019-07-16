@@ -1,6 +1,5 @@
 const formatDates = list => {
-  return list.map(object => {
-    const { created_at, ...restOfObject } = object;
+  return list.map(({ created_at, ...restOfObject }) => {
     return created_at ? {
       created_at: new Date(created_at),
       ...restOfObject
@@ -18,8 +17,7 @@ exports.makeRefObj = (list, prop, val) => {
 };
 
 exports.formatComments = (comments, articleRef) => {
-  return formatDates(comments.map(comment => {
-    const { created_by, belongs_to, ...restOfKeys } = comment;
+  return formatDates(comments.map(({ created_by, belongs_to, ...restOfKeys }) => {
     return { author: created_by, article_id: articleRef[belongs_to], ...restOfKeys };
   }));
 };
