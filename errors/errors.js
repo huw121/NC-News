@@ -11,6 +11,7 @@ exports.customErrors = (err, req, res, next) => {
 
 exports.sqlErrors = (err, req, res, next) => {
   console.log('<<< IN SQL ERROR >>>');
+  console.log(err)
   if (err.code) {
     res.status(400).send({ message: err.message.split(' - ')[1] })
   }

@@ -232,5 +232,31 @@ describe('/api', () => {
       })
       return Promise.all(methodPromises);
     });
+    describe.only('/api/articles/:article_id/comments', () => {
+      describe('POST', () => {
+        it('returns 201 and the posted comment', () => {
+          return request(app)
+            .post('/api/articles/1/comments')
+            .send({
+              username: 'butter_bridge',
+              body: 'hello this is my first comment woop'
+            })
+            .expect(201)
+            .then(({ body: { comment } }) => {
+              expect(comment.body).to.equal('hello this is my first comment woop');
+              expect(comment.author).to.equal('butter_bridge');
+              expect(comment.article_id).to.equal(1);
+              expect(comment).to.have.all.keys(
+                'comment_id',
+                'author',
+                'article_id',
+                'votes',
+                'created_at',
+                'body'
+              )
+            })
+        });
+      });
+    });
   });
 });
