@@ -55,59 +55,108 @@ describe('/api', () => {
         })
     });
   });
-  describe('GET /api/articles/:article_id', () => {
-    it('responds 200 with a article object', () => {
-      return request(app)
-        .get('/api/articles/1')
-        .expect(200)
-        .then(({ body: { article } }) => {
-          expect(article).to.have.all.keys(
-            'author',
-            'title',
-            'article_id',
-            'body',
-            'topic',
-            'created_at',
-            'votes',
-            'comment_count'
-          );
-          expect(article.article_id).to.equal(1);
-        })
-    })
-    it('responds 200 with a article object when there are no comments', () => {
-      return request(app)
-        .get('/api/articles/2')
-        .expect(200)
-        .then(({ body: { article } }) => {
-          expect(article).to.have.all.keys(
-            'author',
-            'title',
-            'article_id',
-            'body',
-            'topic',
-            'created_at',
-            'votes',
-            'comment_count'
-          );
-          expect(article.article_id).to.equal(2);
-          expect(article.comment_count).to.equal(0);
-        })
-    })
-    it('responds 404 with a message when request is made with a non existant article id', () => {
-      return request(app)
-        .get('/api/articles/99999')
-        .expect(404)
-        .then(({ body: { message } }) => {
-          expect(message).to.equal('article not found');
-        })
+  describe('/api/articles/:article_id', () => {
+    describe('GET', () => {
+      it('responds 200 with a article object', () => {
+        return request(app)
+          .get('/api/articles/1')
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article).to.have.all.keys(
+              'author',
+              'title',
+              'article_id',
+              'body',
+              'topic',
+              'created_at',
+              'votes',
+              'comment_count'
+            );
+            expect(article.article_id).to.equal(1);
+          })
+      })
+      it('responds 200 with a article object when there are no comments', () => {
+        return request(app)
+          .get('/api/articles/2')
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article).to.have.all.keys(
+              'author',
+              'title',
+              'article_id',
+              'body',
+              'topic',
+              'created_at',
+              'votes',
+              'comment_count'
+            );
+            expect(article.article_id).to.equal(2);
+            expect(article.comment_count).to.equal(0);
+          })
+      })
+      it('responds 404 with a message when request is made with a non existant article id', () => {
+        return request(app)
+          .get('/api/articles/99999')
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('article not found');
+          })
+      });
+      it('responds 400 and a message when requesting with an invalid article id', () => {
+        return request(app)
+          .get('/api/articles/invalid')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('invalid input syntax for integer: "invalid"');
+          })
+      });
     });
-    it('responds 400 and a message when requesting with an invalid article id', () => {
-      return request(app)
-        .get('/api/articles/invalid')
-        .expect(400)
-        .then(({ body: { message } }) => {
-          expect(message).to.equal('invalid input syntax for integer: "invalid"');
-        })
+    describe.only('PATCH', () => {
+      it('responds status 201 with the patched article', () => {
+        return request(app)
+          .patch('/api/articles/1')
+          .send({ inc_votes: 1 })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article).to.have.all.keys(
+              'author',
+              'title',
+              'article_id',
+              'body',
+              'topic',
+              'created_at',
+              'votes',
+            )
+            expect(article.votes).to.equal(101);
+          });
+      });
+      it('responds 404 with a message when request is made with a non existant article id', () => {
+        return request(app)
+          .patch('/api/articles/99999')
+          .send({ inc_votes: 1 })
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('article not found');
+          })
+      });
+      it('responds 400 and a message when requesting with an invalid article id', () => {
+        return request(app)
+          .patch('/api/articles/invalid')
+          .send({ inc_votes: 1 })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('invalid input syntax for integer: "invalid"');
+          })
+      });
+      it('responds 400 and a message when request is made with an invalid vote increment', () => {
+        return request(app)
+          .patch('/api/articles/1')
+          .send({ inc_votes: 'a' })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('invalid input syntax for integer: "NaN"');
+          })
+      });
     });
   });
 });

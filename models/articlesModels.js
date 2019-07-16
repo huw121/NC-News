@@ -14,3 +14,14 @@ exports.selectArticle = ({ article_id }) => {
       }
     })
 }
+
+exports.updateArticle = ({ article_id }, { inc_votes }) => {
+  return connection('articles')
+    .where({ article_id })
+    .increment('votes', inc_votes)
+    .returning('*')
+    .then(article => {
+      if (!article.length) return Promise.reject({status: 404, message: 'article not found'});
+      return article[0];
+    })
+}
