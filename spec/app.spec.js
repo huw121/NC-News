@@ -29,7 +29,7 @@ describe('/api', () => {
       .get('/api/not-a-route')
       .expect(404)
       .then(({ body: { message } }) => {
-        expect(message).to.equal("Route Not Found");
+        expect(message).to.equal("route not found");
       })
   });
   describe('GET /api/users/:username', () => {
