@@ -47,7 +47,12 @@ describe('/api', () => {
         })
     })
     it('responds 404 when request is made with a non existant username', () => {
-      
+      return request(app)
+        .get('/api/users/notauser')
+        .expect(404)
+        .then(({ body: { message } }) => {
+          expect(message).to.equal('user not found');
+        })
     });
   });
 });
