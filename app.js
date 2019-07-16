@@ -8,6 +8,7 @@ app.use('/api', apiRouter);
 app.use(customErrors);
 app.use(sqlErrors);
 app.use(serverError);
+
 app.all('/*', routeError);
 
 module.exports = app;
