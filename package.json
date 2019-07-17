@@ -14,7 +14,8 @@
     "migrate-latest-test": "NODE_ENV=test knex migrate:latest",
     "migrate-rollback-test": "NODE_ENV=test knex migrate:rollback",
     "migrate-down-up": "npm run migrate-rollback && npm run migrate-latest",
-    "dev": "nodemon listen.js"
+    "dev": "nodemon listen.js",
+    "all-tests": "mocha spec/"
   },
   "repository": {
     "type": "git",

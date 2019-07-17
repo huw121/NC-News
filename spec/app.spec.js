@@ -13,6 +13,16 @@ describe('/api', () => {
   beforeEach(() => {
     return connection.seed.run();
   });
+  // describe('GET', () => {
+  //   it('GET /api serves a json object describing all api endpoints', () => {
+  //     return request(app)
+  //       .get('/api')
+  //       .expect(200)
+  //       .then(({ body }) => {
+          
+  //       })
+  //   });
+  // });
   describe('/api/topics', () => {
     describe('GET', () => {
       it('responds with status 200 and a list of all topics', () => {
@@ -743,7 +753,7 @@ describe('/api', () => {
             inc_votes: 10
           })
           .expect(404)
-          .then(({body: {message}}) => {
+          .then(({ body: { message } }) => {
             expect(message).to.equal('comment not found');
           })
       });
@@ -754,7 +764,7 @@ describe('/api', () => {
             inc_votes: 10
           })
           .expect(400)
-          .then(({body: {message}}) => {
+          .then(({ body: { message } }) => {
             expect(message).to.equal('invalid input syntax for integer: "invalid_id"');
           })
       });
@@ -765,7 +775,7 @@ describe('/api', () => {
             inc_votes: 'not an integer'
           })
           .expect(400)
-          .then(({body: {message}}) => {
+          .then(({ body: { message } }) => {
             expect(message).to.equal('invalid input syntax for integer: "NaN"');
           })
       });
@@ -774,7 +784,7 @@ describe('/api', () => {
           .patch('/api/comments/1')
           .send({})
           .expect(400)
-          .then(({body: {message}}) => {
+          .then(({ body: { message } }) => {
             expect(message).to.equal('invalid request: inc_votes not found');
           })
       });
@@ -785,7 +795,7 @@ describe('/api', () => {
             body: 'a body to be ignored'
           })
           .expect(400)
-          .then(({body: {message}}) => {
+          .then(({ body: { message } }) => {
             expect(message).to.equal('invalid request: inc_votes not found');
           })
       });
@@ -822,7 +832,7 @@ describe('/api', () => {
         return request(app)
           .delete('/api/comments/9876545')
           .expect(404)
-          .then(({body: {message}}) => {
+          .then(({ body: { message } }) => {
             expect(message).to.equal('comment not found');
           })
       });
@@ -830,7 +840,7 @@ describe('/api', () => {
         return request(app)
           .delete('/api/comments/invalid_comment_id')
           .expect(400)
-          .then(({body: {message}}) => {
+          .then(({ body: { message } }) => {
             expect(message).to.equal('invalid input syntax for integer: "invalid_comment_id"');
           })
       });
