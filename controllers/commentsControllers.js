@@ -9,7 +9,7 @@ exports.postComment = (req, res, next) => {
 }
 
 exports.getComments = (req, res, next) => {
-  selectAllComments(req.params)
+  selectAllComments(req.params, req.query)
     .then(comments => {
       res.status(200).send({ comments });
     })
