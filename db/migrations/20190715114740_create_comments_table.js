@@ -4,7 +4,7 @@ exports.up = function(connection) {
     .schema
     .createTable('comments', (commentsTable) => {
       commentsTable.increments('comment_id');
-      commentsTable.string('author');
+      commentsTable.string('author').notNullable();
       commentsTable.foreign('author').references('users.username');
       commentsTable.integer('article_id').unsigned();
       commentsTable.foreign('article_id').references('articles.article_id');

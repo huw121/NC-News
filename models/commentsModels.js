@@ -8,3 +8,8 @@ exports.insertComment = ({ article_id }, { username, body }) => {
       return comment[0];
     })
 }
+
+exports.selectAllComments = ({ article_id }) => {
+  return connection('comments')
+    .select('votes', 'author', 'created_at', 'comment_id', 'body');
+}
