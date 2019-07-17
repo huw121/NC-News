@@ -16,7 +16,7 @@ exports.selectArticle = ({ article_id }) => {
 }
 
 exports.updateArticle = ({ article_id }, { inc_votes }) => {
-  if (!inc_votes) return Promise.reject({ status: 400, message: 'invalid request' });
+  if (!inc_votes) return Promise.reject({ status: 400, message: 'invalid request: inc_votes not found' });
   else {
     return connection('articles')
       .where({ article_id })

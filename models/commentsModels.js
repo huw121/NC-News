@@ -20,3 +20,25 @@ exports.selectAllComments = ({ article_id }, { sort_by = 'created_at', order = '
       else return comments;
     })
 }
+
+exports.updateComment = ({ comment_id }, { inc_votes }) => {
+  if (!inc_votes) return Promise.reject({ status: 400, message: 'invalid request: inc_votes not found' });
+  return connection('comments')
+    .where({ comment_id })
+    .increment('votes', inc_votes || 0)
+    .returning('*')
+    .then(comment => {
+      if (!comment.length) return Promise.reject({ status: 404, message: 'comment not found' })
+      return comment[0];
+    })
+}
+
+exports.delComment = ({ comment_id }) => {
+  return connection('comments')
+    .where({ comment_id })
+    .del()
+    .then(delCount => {
+      if (!delCount) return Promise.reject({status: 404, message: 'comment not found'});
+      return delCount;
+    })
+}

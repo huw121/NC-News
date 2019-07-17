@@ -193,7 +193,7 @@ describe('/api', () => {
           .send({ invalid_prop: 1 })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid request');
+            expect(message).to.equal('invalid request: inc_votes not found');
           })
       });
       it('ERROR 400 and a message when request is made without inc_votes', () => {
@@ -202,7 +202,7 @@ describe('/api', () => {
           .send({})
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid request');
+            expect(message).to.equal('invalid request: inc_votes not found');
           })
       });
       it('respond ignores additional properties in the request', () => {
@@ -700,6 +700,138 @@ describe('/api', () => {
               'votes',
               'comment_count'
             );
+          })
+      });
+    });
+  });
+  describe('/api/comments/:comment_id', () => {
+    it('ERROR 405 when request made wtih invalid method', () => {
+      const invalidMethods = ['put', 'get', 'post'];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)[method]('/api/comments/1')
+          .expect(405)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('method not allowed');
+          })
+      })
+      return Promise.all(methodPromises);
+    });
+    describe('PATCH', () => {
+      it('responds 201 with the updated comment', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({
+            inc_votes: 10
+          })
+          .expect(201)
+          .then(({ body: { comment } }) => {
+            expect(comment.votes).to.equal(26)
+            expect(comment).to.have.all.keys(
+              'body',
+              'comment_id',
+              'article_id',
+              'author',
+              'created_at',
+              'votes'
+            );
+          })
+      });
+      it('ERROR 404 when trying requesting to non existant comment id', () => {
+        return request(app)
+          .patch('/api/comments/999090909')
+          .send({
+            inc_votes: 10
+          })
+          .expect(404)
+          .then(({body: {message}}) => {
+            expect(message).to.equal('comment not found');
+          })
+      });
+      it('ERROR 400 when trying requesting to an invalid comment id', () => {
+        return request(app)
+          .patch('/api/comments/invalid_id')
+          .send({
+            inc_votes: 10
+          })
+          .expect(400)
+          .then(({body: {message}}) => {
+            expect(message).to.equal('invalid input syntax for integer: "invalid_id"');
+          })
+      });
+      it('ERROR 400 when sending an invalid vote_inc', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({
+            inc_votes: 'not an integer'
+          })
+          .expect(400)
+          .then(({body: {message}}) => {
+            expect(message).to.equal('invalid input syntax for integer: "NaN"');
+          })
+      });
+      it('ERROR 400 when sending nothing', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({})
+          .expect(400)
+          .then(({body: {message}}) => {
+            expect(message).to.equal('invalid request: inc_votes not found');
+          })
+      });
+      it('ERROR 400 when sending a request without inc_votes but with some other prop', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({
+            body: 'a body to be ignored'
+          })
+          .expect(400)
+          .then(({body: {message}}) => {
+            expect(message).to.equal('invalid request: inc_votes not found');
+          })
+      });
+      it('responds 201 with the updated comment when post request is supplied with inc_votes and another property; the irrelevent property will be ignored', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({
+            inc_votes: 10,
+            body: 'a body to be ignored',
+            legs: 2
+          })
+          .expect(201)
+          .then(({ body: { comment } }) => {
+            expect(comment.votes).to.equal(26)
+            expect(comment).to.have.all.keys(
+              'body',
+              'comment_id',
+              'article_id',
+              'author',
+              'created_at',
+              'votes'
+            );
+            expect(comment.body).to.not.equal('a body to be ignored');
+          })
+      });
+    });
+    describe('DELETE', () => {
+      it('responds 204 and no content', () => {
+        return request(app)
+          .delete('/api/comments/1')
+          .expect(204);
+      });
+      it('ERROR 404 comment not found if request made to non existant comment', () => {
+        return request(app)
+          .delete('/api/comments/9876545')
+          .expect(404)
+          .then(({body: {message}}) => {
+            expect(message).to.equal('comment not found');
+          })
+      });
+      it('ERROR 400 comment not found if request made to an invalid comment', () => {
+        return request(app)
+          .delete('/api/comments/invalid_comment_id')
+          .expect(400)
+          .then(({body: {message}}) => {
+            expect(message).to.equal('invalid input syntax for integer: "invalid_comment_id"');
           })
       });
     });
