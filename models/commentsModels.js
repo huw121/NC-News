@@ -1,11 +1,19 @@
 const connection = require('../db/connection.js');
 
 exports.insertComment = ({ article_id }, { username, body }) => {
-  return connection('comments')
-    .insert({ article_id, author: username, body })
-    .returning('*')
-    .then(comment => {
-      return comment[0];
+  return connection('articles')
+    .select('*')
+    .where({ article_id })
+    .then(articles => {
+      if (!articles.length) return Promise.reject({ status: 422, message: 'article_id not found' });
+      else {
+        return connection('comments')
+          .insert({ article_id, author: username, body })
+          .returning('*')
+          .then(comment => {
+            return comment[0];
+          })
+      }
     })
 }
 
@@ -16,7 +24,15 @@ exports.selectAllComments = ({ article_id }, { sort_by = 'created_at', order = '
     .where({ article_id })
     .orderBy(sort_by, order)
     .then(comments => {
-      if (!comments.length) return Promise.reject({ status: 404, message: 'not found' });
+      if (!comments.length) {
+        return connection('articles')
+          .select('*')
+          .where({ article_id })
+          .then(articles => {
+            if (!articles.length) return Promise.reject({ status: 422, message: 'article_id not found' })
+            else return [];
+          })
+      }
       else return comments;
     })
 }
@@ -38,7 +54,7 @@ exports.delComment = ({ comment_id }) => {
     .where({ comment_id })
     .del()
     .then(delCount => {
-      if (!delCount) return Promise.reject({status: 404, message: 'comment not found'});
+      if (!delCount) return Promise.reject({ status: 404, message: 'comment not found' });
       return delCount;
     })
 }

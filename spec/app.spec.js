@@ -13,16 +13,33 @@ describe('/api', () => {
   beforeEach(() => {
     return connection.seed.run();
   });
-  // describe('GET', () => {
-  //   it('GET /api serves a json object describing all api endpoints', () => {
-  //     return request(app)
-  //       .get('/api')
-  //       .expect(200)
-  //       .then(({ body }) => {
-          
-  //       })
-  //   });
-  // });
+  it('ERROR 405 method not allowed', () => {
+    const invalidMethods = ['put', 'post', 'patch', 'delete'];
+    const methodPromises = invalidMethods.map(method => {
+      return request(app)[method]('/api')
+        .expect(405)
+        .then(({body: {message}}) => {
+          expect(message).to.equal('method not allowed');
+        })
+    })
+    return Promise.all(methodPromises);
+  });
+  describe('GET', () => {
+    it('GET /api serves a json object describing all api endpoints', () => {
+      return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({ body }) => {
+          let test = true;
+          try {
+            JSON.parse(body);
+          } catch(err) {
+            test = false;
+          }
+          expect(test).to.be.true;
+        })
+    });
+  });
   describe('/api/topics', () => {
     describe('GET', () => {
       it('responds with status 200 and a list of all topics', () => {
@@ -152,11 +169,11 @@ describe('/api', () => {
       });
     });
     describe('PATCH', () => {
-      it('responds status 201 with the patched article', () => {
+      it('responds status 200 with the patched article', () => {
         return request(app)
           .patch('/api/articles/1')
           .send({ inc_votes: 1 })
-          .expect(201)
+          .expect(200)
           .then(({ body: { article } }) => {
             expect(article).to.have.all.keys(
               'author',
@@ -215,7 +232,7 @@ describe('/api', () => {
             expect(message).to.equal('invalid request: inc_votes not found');
           })
       });
-      it('respond ignores additional properties in the request', () => {
+      it('responds 200 ignores additional properties in the request', () => {
         return request(app)
           .patch('/api/articles/1')
           .send({
@@ -223,7 +240,7 @@ describe('/api', () => {
             legs: 12,
             author: 'huw'
           })
-          .expect(201)
+          .expect(200)
           .then(({ body: { article } }) => {
             expect(article).to.have.all.keys(
               'author',
@@ -298,16 +315,16 @@ describe('/api', () => {
             expect(message).to.equal('invalid input syntax for integer: "dog"');
           })
       });
-      it('ERROR 400 when posted a comment citing a non existant article_id', () => {
+      it('ERROR 422 when posted a comment citing a non existant article_id', () => {
         return request(app)
           .post('/api/articles/999099/comments')
           .send({
             username: 'butter_bridge',
             body: 'woo a comment'
           })
-          .expect(400)
+          .expect(422)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('insert or update on table "comments" violates foreign key constraint "comments_article_id_foreign"');
+            expect(message).to.equal('article_id not found');
           })
       });
       it('ERROR 400 when posted a comment without a username', () => {
@@ -405,6 +422,14 @@ describe('/api', () => {
             );
           })
       });
+      it('responds 200 and an empty array when passed an existing article_id which has no comments', () => {
+        return request(app)
+          .get('/api/articles/2/comments')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).to.eql([]);
+          })
+      });
       describe('takes sort_by and order queries which...', () => {
         it('sorts by created_at and descending order by default', () => {
           return request(app)
@@ -463,12 +488,12 @@ describe('/api', () => {
             expect(message).to.equal('invalid input syntax for integer: "dog"');
           })
       });
-      it('ERROR 404 when requesting comments citing a non existant article_id', () => {
+      it('ERROR 422 when requesting comments citing a non existant article_id', () => {
         return request(app)
           .get('/api/articles/999099/comments')
-          .expect(404)
+          .expect(422)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('not found');
+            expect(message).to.equal('article_id not found');
           })
       });
       it('returns 200 when requesting comments using a query that does not exist', () => {
@@ -727,13 +752,13 @@ describe('/api', () => {
       return Promise.all(methodPromises);
     });
     describe('PATCH', () => {
-      it('responds 201 with the updated comment', () => {
+      it('responds 200 with the updated comment', () => {
         return request(app)
           .patch('/api/comments/1')
           .send({
             inc_votes: 10
           })
-          .expect(201)
+          .expect(200)
           .then(({ body: { comment } }) => {
             expect(comment.votes).to.equal(26)
             expect(comment).to.have.all.keys(
@@ -799,7 +824,7 @@ describe('/api', () => {
             expect(message).to.equal('invalid request: inc_votes not found');
           })
       });
-      it('responds 201 with the updated comment when post request is supplied with inc_votes and another property; the irrelevent property will be ignored', () => {
+      it('responds 200 with the updated comment when post request is supplied with inc_votes and another property; the irrelevent property will be ignored', () => {
         return request(app)
           .patch('/api/comments/1')
           .send({
@@ -807,7 +832,7 @@ describe('/api', () => {
             body: 'a body to be ignored',
             legs: 2
           })
-          .expect(201)
+          .expect(200)
           .then(({ body: { comment } }) => {
             expect(comment.votes).to.equal(26)
             expect(comment).to.have.all.keys(
