@@ -18,7 +18,7 @@ describe('/api', () => {
     const methodPromises = invalidMethods.map(method => {
       return request(app)[method]('/api')
         .expect(405)
-        .then(({body: {message}}) => {
+        .then(({ body: { message } }) => {
           expect(message).to.equal('method not allowed');
         })
     })
@@ -30,13 +30,16 @@ describe('/api', () => {
         .get('/api')
         .expect(200)
         .then(({ body }) => {
-          let test = true;
-          try {
-            JSON.parse(body);
-          } catch(err) {
-            test = false;
-          }
-          expect(test).to.be.true;
+          expect(body).to.contain.keys(
+            'GET /api',
+          )
+          // let test = true;
+          // try {
+          //   JSON.parse(body);
+          // } catch (err) {
+          //   test = false;
+          // }
+          // expect(test).to.be.true;
         })
     });
   });
