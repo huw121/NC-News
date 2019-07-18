@@ -17,8 +17,12 @@ exports.makeRefObj = (list, prop, val) => {
 };
 
 exports.formatComments = (comments, articleRef) => {
-  return formatDates(comments.map(({ created_by, belongs_to, ...restOfKeys }) => {
-    return { author: created_by, article_id: articleRef[belongs_to], ...restOfKeys };
-  }));
+  return comments.map(({ created_by, belongs_to, created_at, ...restOfKeys }) => {
+    return { 
+      author: created_by, 
+      article_id: articleRef[belongs_to],
+      created_at: new Date(created_at),
+      ...restOfKeys };
+  });
 };
 

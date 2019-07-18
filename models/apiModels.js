@@ -1,10 +1,5 @@
-const fs = require('fs');
+const json = require('../endpoints.json');
 
 exports.sendJSON = () => {
-  return new Promise((resolve, reject) => {
-    fs.readFile('./endpoints.json', (err, json) => {
-      if (err) reject(err);
-      else resolve(JSON.parse(json));
-    })
-  })
+  return json
 }

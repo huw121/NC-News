@@ -10,10 +10,10 @@ exports.insertComment = ({ article_id }, { username, body }) => {
         return connection('comments')
           .insert({ article_id, author: username, body })
           .returning('*')
-          .then(comment => {
-            return comment[0];
-          })
       }
+    })
+    .then(comment => {
+      return comment[0];
     })
 }
 
@@ -25,14 +25,15 @@ exports.selectAllComments = ({ article_id }, { sort_by = 'created_at', order = '
     .orderBy(sort_by, order)
     .then(comments => {
       if (!comments.length) {
-        return connection('articles')
+        const articles = connection('articles')
           .select('*')
-          .where({ article_id })
-          .then(articles => {
-            if (!articles.length) return Promise.reject({ status: 404, message: 'article_id not found' })
-            else return [];
-          })
+          .where({ article_id });
+        return Promise.all([articles, comments]);
       }
+      else return [null, comments];
+    })
+    .then(([articles, comments]) => {
+      if (articles && !articles.length) return Promise.reject({ status: 404, message: 'article_id not found' })
       else return comments;
     })
 }

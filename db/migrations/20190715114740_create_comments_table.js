@@ -7,7 +7,7 @@ exports.up = function(connection) {
       commentsTable.string('author').notNullable();
       commentsTable.foreign('author').references('users.username');
       commentsTable.integer('article_id').unsigned();
-      commentsTable.foreign('article_id').references('articles.article_id');
+      commentsTable.foreign('article_id').references('articles.article_id').onDelete("CASCADE");
       commentsTable.integer('votes').defaultTo(0);
       commentsTable.timestamp('created_at').defaultTo(connection.fn.now());
       commentsTable.text('body').notNullable();

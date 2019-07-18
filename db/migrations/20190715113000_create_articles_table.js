@@ -9,7 +9,7 @@ exports.up = function(connection) {
       articlesTable.integer('votes').defaultTo(0);
       articlesTable.string('topic');
       articlesTable.foreign('topic').references('topics.slug');
-      articlesTable.string('author');
+      articlesTable.string('author').notNullable();
       articlesTable.foreign('author').references('users.username');
       articlesTable.timestamp('created_at').defaultTo(connection.fn.now());
     })
