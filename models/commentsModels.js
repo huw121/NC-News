@@ -33,8 +33,9 @@ exports.selectAllComments = ({ article_id }, { sort_by = 'created_at', order = '
       else return [null, comments];
     })
     .then(([articles, comments]) => {
-      if (articles && !articles.length) return Promise.reject({ status: 404, message: 'article_id not found' })
-      else return comments;
+      return articles && !articles.length
+        ? Promise.reject({ status: 404, message: 'article_id not found' })
+        : comments;
     })
 }
 
