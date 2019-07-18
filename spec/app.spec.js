@@ -315,14 +315,14 @@ describe('/api', () => {
             expect(message).to.equal('invalid input syntax for integer: "dog"');
           })
       });
-      it('ERROR 422 when posted a comment citing a non existant article_id', () => {
+      it('ERROR 404 when posted a comment citing a non existant article_id', () => {
         return request(app)
           .post('/api/articles/999099/comments')
           .send({
             username: 'butter_bridge',
             body: 'woo a comment'
           })
-          .expect(422)
+          .expect(404)
           .then(({ body: { message } }) => {
             expect(message).to.equal('article_id not found');
           })
@@ -488,10 +488,10 @@ describe('/api', () => {
             expect(message).to.equal('invalid input syntax for integer: "dog"');
           })
       });
-      it('ERROR 422 when requesting comments citing a non existant article_id', () => {
+      it('ERROR 404 when requesting comments citing a non existant article_id', () => {
         return request(app)
           .get('/api/articles/999099/comments')
-          .expect(422)
+          .expect(404)
           .then(({ body: { message } }) => {
             expect(message).to.equal('article_id not found');
           })

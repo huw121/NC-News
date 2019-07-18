@@ -5,7 +5,7 @@ exports.insertComment = ({ article_id }, { username, body }) => {
     .select('*')
     .where({ article_id })
     .then(articles => {
-      if (!articles.length) return Promise.reject({ status: 422, message: 'article_id not found' });
+      if (!articles.length) return Promise.reject({ status: 404, message: 'article_id not found' });
       else {
         return connection('comments')
           .insert({ article_id, author: username, body })
@@ -29,7 +29,7 @@ exports.selectAllComments = ({ article_id }, { sort_by = 'created_at', order = '
           .select('*')
           .where({ article_id })
           .then(articles => {
-            if (!articles.length) return Promise.reject({ status: 422, message: 'article_id not found' })
+            if (!articles.length) return Promise.reject({ status: 404, message: 'article_id not found' })
             else return [];
           })
       }
