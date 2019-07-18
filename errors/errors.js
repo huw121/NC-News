@@ -12,7 +12,13 @@ exports.customErrors = (err, req, res, next) => {
 exports.sqlErrors = (err, req, res, next) => {
   //console.log('<<< IN SQL ERROR >>>');
   if (err.code) {
-    res.status(400).send({ message: err.message.split(' - ')[1] })
+    const codes = {
+      "22P02": {status: 400, message: 'INVALID TEXT REPRESENTATION'},
+      23502: {status: 400, message: 'NOT NULL VIOLATION'},
+      23503: {status: 404, message: 'FOREIGN KEY VIOLATION'},
+      42703: {status: 400, message: 'UNDEFINED COLUMN'}
+    }
+    res.status(codes[err.code].status).send({message: codes[err.code].message})
   }
   else next(err);
 }

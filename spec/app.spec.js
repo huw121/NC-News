@@ -167,7 +167,7 @@ describe('/api', () => {
           .get('/api/articles/invalid')
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid input syntax for integer: "invalid"');
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
       });
     });
@@ -205,7 +205,7 @@ describe('/api', () => {
           .send({ inc_votes: 1 })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid input syntax for integer: "invalid"');
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
       });
       it('ERROR 400 and a message when request is made with an invalid vote increment', () => {
@@ -214,7 +214,7 @@ describe('/api', () => {
           .send({ inc_votes: 'a' })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid input syntax for integer: "NaN"');
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
       });
       it('ERROR 400 and a message when request is made with an invalid property', () => {
@@ -315,7 +315,7 @@ describe('/api', () => {
           })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid input syntax for integer: "dog"');
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
       });
       it('ERROR 404 when posted a comment citing a non existant article_id', () => {
@@ -327,7 +327,7 @@ describe('/api', () => {
           })
           .expect(404)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('article_id not found');
+            expect(message).to.equal('FOREIGN KEY VIOLATION');
           })
       });
       it('ERROR 400 when posted a comment without a username', () => {
@@ -338,7 +338,7 @@ describe('/api', () => {
           })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('null value in column "author" violates not-null constraint');
+            expect(message).to.equal('NOT NULL VIOLATION');
           })
       });
       it('ERROR 400 when posted a comment without a body', () => {
@@ -349,7 +349,7 @@ describe('/api', () => {
           })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('null value in column "body" violates not-null constraint');
+            expect(message).to.equal('NOT NULL VIOLATION');
           })
       });
       it('ERROR 400 when posted a comment to a user who doesnt exist', () => {
@@ -359,9 +359,9 @@ describe('/api', () => {
             username: 'huw',
             body: 'woop a comment woo'
           })
-          .expect(400)
+          .expect(404)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('insert or update on table "comments" violates foreign key constraint "comments_author_foreign"');
+            expect(message).to.equal('FOREIGN KEY VIOLATION');
           })
       });
       it('returns 201 and the posted comment and ignores any extra legitimate props posted', () => {
@@ -488,7 +488,7 @@ describe('/api', () => {
           .get('/api/articles/dog/comments')
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid input syntax for integer: "dog"');
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
       });
       it('ERROR 404 when requesting comments citing a non existant article_id', () => {
@@ -527,7 +527,7 @@ describe('/api', () => {
           .get('/api/articles/1/comments?sort_by=notacolumn')
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('column "notacolumn" does not exist');
+            expect(message).to.equal('UNDEFINED COLUMN');
           })
       });
     });
@@ -661,7 +661,7 @@ describe('/api', () => {
           .get('/api/articles?sort_by=notAcolumn')
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('column "notAcolumn" does not exist');
+            expect(message).to.equal('UNDEFINED COLUMN');
           })
       });
       it('ERROR 400 when attempting to set order to something other than asc or desc', () => {
@@ -793,7 +793,7 @@ describe('/api', () => {
           })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid input syntax for integer: "invalid_id"');
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
       });
       it('ERROR 400 when sending an invalid vote_inc', () => {
@@ -804,7 +804,7 @@ describe('/api', () => {
           })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid input syntax for integer: "NaN"');
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
       });
       it('ERROR 400 when sending nothing', () => {
@@ -869,7 +869,7 @@ describe('/api', () => {
           .delete('/api/comments/invalid_comment_id')
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).to.equal('invalid input syntax for integer: "invalid_comment_id"');
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
       });
     });

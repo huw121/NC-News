@@ -1,17 +1,9 @@
 const connection = require('../db/connection.js');
 
 exports.insertComment = ({ article_id }, { username, body }) => {
-  return connection('articles')
-    .select('*')
-    .where({ article_id })
-    .then(articles => {
-      if (!articles.length) return Promise.reject({ status: 404, message: 'article_id not found' });
-      else {
-        return connection('comments')
-          .insert({ article_id, author: username, body })
-          .returning('*')
-      }
-    })
+  return connection('comments')
+    .insert({ article_id, author: username, body })
+    .returning('*')
     .then(comment => {
       return comment[0];
     })
