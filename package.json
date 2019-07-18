@@ -15,7 +15,11 @@
     "migrate-rollback-test": "NODE_ENV=test knex migrate:rollback",
     "migrate-down-up": "npm run migrate-rollback && npm run migrate-latest",
     "dev": "nodemon listen.js",
-    "all-tests": "mocha spec/"
+    "all-tests": "mocha spec/",
+    "seed:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex seed:run",
+    "migrate-latest:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:latest",
+    "migrate-rollback:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:rollback",
+    "start": "node listen.js"
   },
   "repository": {
     "type": "git",
