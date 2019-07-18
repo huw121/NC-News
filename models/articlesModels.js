@@ -1,4 +1,5 @@
 const connection = require('../db/connection.js');
+const { doesRowExistInTable } = require('./commentsModels.js')
 
 exports.selectArticle = ({ article_id }) => {
   return connection('articles')
@@ -49,7 +50,16 @@ exports.selectAllArticles = ({ sort_by = 'created_at', order = 'desc', author, t
       if (topic) query.where({ topic });
     })
     .then(articles => {
-      if(!articles.length) return Promise.reject({status: 404, message: 'not found'});
-      return articles;
+      let check = true;
+      if (!articles.length) {
+        if (author) check = doesRowExistInTable('users', 'username', author);
+        if (topic) check = doesRowExistInTable('topics', 'slug', topic);
+      }
+      return Promise.all([check, articles]);
+    })
+    .then(([check, articles]) => {
+      return check
+        ? articles
+        : Promise.reject({ status: 404, message: 'not found' });
     })
 }

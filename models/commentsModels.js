@@ -16,18 +16,16 @@ exports.selectAllComments = ({ article_id }, { sort_by = 'created_at', order = '
     .where({ article_id })
     .orderBy(sort_by, order)
     .then(comments => {
+      let articleCheck = true;
       if (!comments.length) {
-        const articles = connection('articles')
-          .select('*')
-          .where({ article_id });
-        return Promise.all([articles, comments]);
+        articleCheck = doesRowExistInTable('articles', 'article_id', article_id);
       }
-      else return [null, comments];
+      return Promise.all([articleCheck, comments]);
     })
-    .then(([articles, comments]) => {
-      return articles && !articles.length
-        ? Promise.reject({ status: 404, message: 'article_id not found' })
-        : comments;
+    .then(([articleCheck, comments]) => {
+      return articleCheck
+        ? comments
+        : Promise.reject({ status: 404, message: 'article_id not found' });
     })
 }
 
@@ -52,3 +50,14 @@ exports.delComment = ({ comment_id }) => {
       return delCount;
     })
 }
+
+const doesRowExistInTable = (table, identifierColumn, identifierRow) => {
+  return connection(table)
+    .select('*')
+    .where(identifierColumn, identifierRow)
+    .then(array => {
+      return array.length !== 0;
+    })
+}
+
+exports.doesRowExistInTable = doesRowExistInTable;

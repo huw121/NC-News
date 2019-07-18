@@ -688,20 +688,20 @@ describe('/api', () => {
             expect(message).to.equal('not found');
           })
       });
-      it('ERROR 404 when attempting to filter by an author has no articles', () => {
+      it('responds 200 and an empty array when attempting to filter by an author has no articles', () => {
         return request(app)
           .get('/api/articles?author=lurker')
-          .expect(404)
-          .then(({ body: { message } }) => {
-            expect(message).to.equal('not found');
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.eql([]);
           })
       });
-      it('ERROR 404 when attempting to filter by an topic has no articles', () => {
+      it('ERROR 200 and an empty array when attempting to filter by an topic has no articles', () => {
         return request(app)
           .get('/api/articles?topic=paper')
-          .expect(404)
-          .then(({ body: { message } }) => {
-            expect(message).to.equal('not found');
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.eql([]);
           })
       });
       it('responds 200 with an array of articles when passed an invalid query', () => {
