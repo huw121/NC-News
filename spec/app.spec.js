@@ -414,8 +414,8 @@ describe('/api', () => {
         return request(app)
           .get('/api/articles/1/comments')
           .expect(200)
-          .then(({ body: { comments } }) => {
-            expect(comments).to.have.lengthOf(13);
+          .then(({ body: { comments, totalCount } }) => {
+            expect(totalCount).to.equal(13);
             expect(comments[0]).to.have.all.keys(
               'comment_id',
               'votes',
@@ -503,8 +503,8 @@ describe('/api', () => {
         return request(app)
           .get('/api/articles/1/comments?dogs=2')
           .expect(200)
-          .then(({ body: { comments } }) => {
-            expect(comments).to.have.lengthOf(13);
+          .then(({ body: { comments, totalCount } }) => {
+            expect(totalCount).to.equal(13);
             expect(comments[0]).to.have.all.keys(
               'comment_id',
               'votes',
@@ -530,6 +530,70 @@ describe('/api', () => {
             expect(message).to.equal('UNDEFINED COLUMN');
           })
       });
+      it('can take a limit query', () => {
+        return request(app)
+          .get('/api/articles/1/comments?limit=5')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).to.have.lengthOf(5);
+          })
+      });
+      it('can take a limit query which is defaulted to 10', () => {
+        return request(app)
+          .get('/api/articles/1/comments')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).to.have.lengthOf(10);
+          })
+      });
+      it('can take a p query which will return specific pages', () => {
+        return request(app)
+          .get('/api/articles/1/comments?p=2')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).to.have.lengthOf(3)
+          })
+      });
+      it('can take a p query which will return return page 1 by deafult', () => {
+        return request(app)
+          .get('/api/articles/1/comments')
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).to.have.lengthOf(10);
+          })
+      });
+      it('ERROR 400 when limit is passed in an invalid format', () => {
+        return request(app)
+          .get('/api/articles/1/comments?limit=invalidFormat')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID LIMIT VALUE');
+          })
+      });
+      it('ERROR 400 when limit is passed in as a number less than 0', () => {
+        return request(app)
+          .get('/api/articles/1/comments?limit=-1')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID LIMIT VALUE');
+          })
+      });
+      it('ERROR 400 when P is passed in as a number less than 1', () => {
+        return request(app)
+          .get('/api/articles/1/comments?p=0')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID PAGE NUMBER');
+          })
+      });
+      it('ERROR 400 when P is passed in in an invalid format', () => {
+        return request(app)
+          .get('/api/articles/1/comments?p=dog')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID PAGE NUMBER');
+          })
+      });
     });
   });
   describe('/api/articles', () => {
@@ -549,8 +613,8 @@ describe('/api', () => {
         return request(app)
           .get('/api/articles')
           .expect(200)
-          .then(({ body: { articles } }) => {
-            expect(articles).to.have.lengthOf(12);
+          .then(({ body: { articles, totalCount } }) => {
+            expect(totalCount).to.equal(12);
             expect(articles[0]).to.have.all.keys(
               'author',
               'title',
@@ -640,8 +704,8 @@ describe('/api', () => {
           return request(app)
             .get('/api/articles?topic=mitch')
             .expect(200)
-            .then(({ body: { articles } }) => {
-              expect(articles).to.have.lengthOf(11);
+            .then(({ body: { articles, totalCount } }) => {
+              expect(totalCount).to.equal(11);
               expect(articles.every(article => article.topic === 'mitch')).to.be.true;
             })
         });
@@ -708,8 +772,8 @@ describe('/api', () => {
         return request(app)
           .get('/api/articles?dogs=2')
           .expect(200)
-          .then(({ body: { articles } }) => {
-            expect(articles).to.have.lengthOf(12);
+          .then(({ body: { articles, totalCount } }) => {
+            expect(totalCount).to.equal(12);
             expect(articles[0]).to.have.all.keys(
               'author',
               'title',
@@ -717,7 +781,8 @@ describe('/api', () => {
               'topic',
               'created_at',
               'votes',
-              'comment_count'
+              'comment_count',
+
             );
           })
       });
@@ -738,6 +803,70 @@ describe('/api', () => {
               'votes',
               'comment_count'
             );
+          })
+      });
+      it('can take a limit query', () => {
+        return request(app)
+          .get('/api/articles?limit=5')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.have.lengthOf(5);
+          })
+      });
+      it('can take a limit query which is defaulted to 10', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).to.have.lengthOf(10);
+          })
+      });
+      it('can take a p query which will return specific pages', () => {
+        return request(app)
+          .get('/api/articles?p=2')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles[0].article_id).to.equal(11);
+          })
+      });
+      it('can take a p query which will return return page 1 by deafult', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles[0].article_id).to.equal(1);
+          })
+      });
+      it('ERROR 400 when limit is passed in an invalid format', () => {
+        return request(app)
+          .get('/api/articles?limit=invalidFormat')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID LIMIT VALUE');
+          })
+      });
+      it('ERROR 400 when limit is passed in as a number less than 0', () => {
+        return request(app)
+          .get('/api/articles?limit=-1')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID LIMIT VALUE');
+          })
+      });
+      it('ERROR 400 when P is passed in as a number less than 1', () => {
+        return request(app)
+          .get('/api/articles?p=0')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID PAGE NUMBER');
+          })
+      });
+      it('ERROR 400 when P is passed in in an invalid format', () => {
+        return request(app)
+          .get('/api/articles?p=dog')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID PAGE NUMBER');
           })
       });
     });
