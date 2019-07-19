@@ -9,3 +9,15 @@ exports.selectUser = ({ username }) => {
       return user;
     })
 }
+
+exports.selectAllUsers = () => {
+  return connection('users')
+    .select('*')
+}
+
+exports.insertUser = ({username, avatar_url = 'https://avatars2.githubusercontent.com/u/24394918?s=400&v=1', name}) => {
+  return connection('users')
+    .insert({username, avatar_url, name})
+    .returning('*')
+    .then(user => user[0])
+}

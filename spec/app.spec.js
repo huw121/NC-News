@@ -33,13 +33,6 @@ describe('/api', () => {
           expect(body).to.contain.keys(
             'GET /api',
           )
-          // let test = true;
-          // try {
-          //   JSON.parse(body);
-          // } catch (err) {
-          //   test = false;
-          // }
-          // expect(test).to.be.true;
         })
     });
   });
@@ -68,6 +61,62 @@ describe('/api', () => {
           })
       })
       return Promise.all(methodPromises);
+    });
+    describe.only('POST', () => {
+      it('it returns 201 and the posted topic', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({
+            slug: 'eggs',
+            description: 'eggs chat'
+          })
+          .expect(201)
+          .then(({ body: { topic } }) => {
+            expect(topic).to.have.all.keys(
+              'slug',
+              'description'
+            )
+          })
+      });
+      it('it returns 201 and the posted topic even if there are extra props', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({
+            slug: 'eggs',
+            description: 'eggs chat',
+            votes: 12,
+            eggs: 1
+          })
+          .expect(201)
+          .then(({ body: { topic } }) => {
+            expect(topic).to.have.all.keys(
+              'slug',
+              'description'
+            )
+          })
+      });
+      it('ERROR 400 if posted without slug', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({
+            description: 'eggs chat',
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT NULL VIOLATION');
+          })
+      });
+      it('ERROR 400 if posted without description', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({
+            slug: 'eggs',
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT NULL VIOLATION');
+          })
+      });
     });
   });
   it('ERROR 404 and an error message when a request is made on an invalid route', () => {
@@ -115,6 +164,29 @@ describe('/api', () => {
     });
   });
   describe('/api/articles/:article_id', () => {
+    describe('DELETE', () => {
+      it('responds 204 no content', () => {
+        return request(app)
+          .delete('/api/articles/1')
+          .expect(204);
+      });
+      it('ERROR 404 when trying to delete a nonexistant article_id', () => {
+        return request(app)
+          .delete('/api/articles/99991')
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('article not found');
+          });
+      });
+      it('ERROR 400 when trying to delete an invalid article_id', () => {
+        return request(app)
+          .delete('/api/articles/invalid')
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID TEXT REPRESENTATION');
+          });
+      });
+    });
     describe('GET', () => {
       it('responds 200 with a article object', () => {
         return request(app)
@@ -260,7 +332,7 @@ describe('/api', () => {
       });
     });
     it('ERROR 405 and a message when an invalid method is attempted', () => {
-      const invalidMethods = ['put', 'delete'];
+      const invalidMethods = ['put'];
       const methodPromises = invalidMethods.map(method => {
         return request(app)[method]('/api/articles/1')
           .expect(405)
@@ -1000,6 +1072,111 @@ describe('/api', () => {
           .then(({ body: { message } }) => {
             expect(message).to.equal('INVALID TEXT REPRESENTATION');
           })
+      });
+    });
+  });
+  describe('/api/users', () => {
+    it('ERROR 405 and a message when an invalid method is attempted', () => {
+      const invalidMethods = ['patch', 'put', 'delete'];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)[method]('/api/users')
+          .expect(405)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('method not allowed');
+          })
+      })
+      return Promise.all(methodPromises);
+    });
+    describe('GET', () => {
+      it('responds with status 200 and a list of all users', () => {
+        return request(app)
+          .get('/api/users')
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users[0]).to.have.all.keys(
+              'username',
+              'avatar_url',
+              'name'
+            );
+            expect(users).to.have.lengthOf(4);
+          });
+      });
+    });
+    describe('POST', () => {
+      it('responds 201 with the posted user object', () => {
+        return request(app)
+          .post('/api/users')
+          .send({
+            username: 'huw',
+            avatar_url: 'https://avatars2.githubusercontent.com/u/24394918?s=400&v=5',
+            name: 'huw j'
+          })
+          .expect(201)
+          .then(({ body: { user } }) => {
+            expect(user).to.have.all.keys(
+              'username',
+              'avatar_url',
+              'name'
+            )
+          });
+      });
+      it('reponds 201 with the posted user when posted extra keys', () => {
+        return request(app)
+          .post('/api/users')
+          .send({
+            username: 'huw',
+            avatar_url: 'https://avatars2.githubusercontent.com/u/24394918?s=400&v=5',
+            name: 'huw j',
+            votes: 1,
+            legs: 6
+          })
+          .expect(201)
+          .then(({ body: { user } }) => {
+            expect(user).to.have.all.keys(
+              'username',
+              'avatar_url',
+              'name'
+            )
+          });
+      });
+      it('responds 201 with thr posted user including a default avatar_url if one if not posted', () => {
+        return request(app)
+          .post('/api/users')
+          .send({
+            username: 'huw',
+            name: 'huw j'
+          })
+          .expect(201)
+          .then(({ body: { user } }) => {
+            expect(user).to.have.all.keys(
+              'username',
+              'avatar_url',
+              'name'
+            )
+            expect(user.avatar_url).to.equal('https://avatars2.githubusercontent.com/u/24394918?s=400&v=1')
+          });
+      });
+      it('ERROR 400 if no username supplied', () => {
+        return request(app)
+          .post('/api/users')
+          .send({
+            name: 'huw j'
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT NULL VIOLATION');
+          });
+      });
+      it('ERROR 400 if no name supplied', () => {
+        return request(app)
+          .post('/api/users')
+          .send({
+            username: 'huw'
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT NULL VIOLATION');
+          });
       });
     });
   });

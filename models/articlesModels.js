@@ -69,3 +69,12 @@ exports.selectAllArticles = ({ sort_by = 'created_at', order = 'desc', author, t
     })
 }
 
+exports.delArticle = ({ article_id }) => {
+  return connection('articles')
+    .where({ article_id })
+    .del()
+    .then(delCount => {
+      if (!delCount) return Promise.reject({ status: 404, message: 'article not found' });
+      return delCount;
+    })
+}
