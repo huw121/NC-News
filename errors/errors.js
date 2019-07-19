@@ -18,7 +18,8 @@ exports.sqlErrors = (err, req, res, next) => {
       23503: {status: 404, message: 'FOREIGN KEY VIOLATION'},
       42703: {status: 400, message: 'UNDEFINED COLUMN'},
       "2201X": {status: 400, message: 'INVALID PAGE NUMBER'},
-      "2201W": {status: 400, message: 'INVALID LIMIT VALUE'}
+      "2201W": {status: 400, message: 'INVALID LIMIT VALUE'},
+      23505: {status: 400, message: 'NOT UNIQUE'}
     }
     res.status(codes[err.code].status).send({message: codes[err.code].message})
   }

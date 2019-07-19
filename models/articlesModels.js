@@ -78,3 +78,10 @@ exports.delArticle = ({ article_id }) => {
       return delCount;
     })
 }
+
+exports.insertArticle = ({title, body, topic, author}) => {
+  return connection('articles')
+    .insert({title, body, topic, author})
+    .returning('*')
+    .then(article => article[0])
+}

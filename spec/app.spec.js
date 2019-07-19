@@ -62,7 +62,7 @@ describe('/api', () => {
       })
       return Promise.all(methodPromises);
     });
-    describe.only('POST', () => {
+    describe('POST', () => {
       it('it returns 201 and the posted topic', () => {
         return request(app)
           .post('/api/topics')
@@ -115,6 +115,18 @@ describe('/api', () => {
           .expect(400)
           .then(({ body: { message } }) => {
             expect(message).to.equal('NOT NULL VIOLATION');
+          })
+      });
+      it('ERROR 400 if posted with a non unique slug', () => {
+        return request(app)
+          .post('/api/topics')
+          .send({
+            slug: 'cats',
+            description: 'eggs for days'
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT UNIQUE');
           })
       });
     });
@@ -942,6 +954,164 @@ describe('/api', () => {
           })
       });
     });
+    describe('POST', () => {
+      it('responds 201 and the posted article', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            title: 'a fun title',
+            body: 'woooo look at this article body',
+            topic: 'mitch',
+            author: 'butter_bridge'
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article).to.have.all.keys(
+              'title',
+              'body',
+              'topic',
+              'author',
+              'article_id',
+              'votes',
+              'created_at'
+            );
+            expect(article.title).to.equal('a fun title');
+            expect(article.body).to.equal('woooo look at this article body');
+            expect(article.topic).to.equal('mitch');
+            expect(article.author).to.equal('butter_bridge');
+          })
+      });
+      it('responds 201 and the posted article even if extra keys are supplied; they are ignored', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            title: 'a fun title',
+            body: 'woooo look at this article body',
+            topic: 'mitch',
+            author: 'butter_bridge',
+            legs: '2',
+            eggs: 1
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article).to.have.all.keys(
+              'title',
+              'body',
+              'topic',
+              'author',
+              'article_id',
+              'votes',
+              'created_at',
+            );
+          })
+      });
+      it('responds 201 and the posted article and default keys are not overwritten if supplied in the post', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            title: 'a fun title',
+            body: 'woooo look at this article body',
+            topic: 'mitch',
+            author: 'butter_bridge',
+            created_at: 91514879925,
+            votes: 22
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article).to.have.all.keys(
+              'title',
+              'body',
+              'topic',
+              'author',
+              'article_id',
+              'votes',
+              'created_at'
+            );
+            expect(article.votes).to.equal(0);
+            expect(article.created_at).to.not.equal(new Date(91514879925));
+          })
+      });
+      it('ERROR 404 if posted with a non existant author', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            title: 'a fun title',
+            body: 'woooo look at this article body',
+            topic: 'mitch',
+            author: 'invalidAUTHOR',
+          })
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('FOREIGN KEY VIOLATION')
+          })
+      });
+      it('ERROR 404 if posted with a non existant topic', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            title: 'a fun title',
+            body: 'woooo look at this article body',
+            topic: 'NOTATOPIC',
+            author: 'butter_bridge',
+          })
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('FOREIGN KEY VIOLATION')
+          })
+      });
+      it('ERROR 400 if posted without topic', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            title: 'a fun title',
+            body: 'woooo look at this article body',
+            author: 'butter_bridge',
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT NULL VIOLATION')
+          })
+      });
+      it('ERROR 400 if posted without author', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            topic: 'mitch',
+            title: 'a fun title',
+            body: 'woooo look at this article body',
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT NULL VIOLATION')
+          })
+      });
+      it('ERROR 400 if posted without title', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            topic: 'mitch',
+            body: 'woooo look at this article body',
+            author: 'butter_bridge',
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT NULL VIOLATION')
+          })
+      });
+      it('ERROR 400 if posted without body', () => {
+        return request(app)
+          .post('/api/articles')
+          .send({
+            topic: 'mitch',
+            title: 'eggs',
+            author: 'butter_bridge',
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT NULL VIOLATION')
+          })
+      });
+    });
   });
   describe('/api/comments/:comment_id', () => {
     it('ERROR 405 when request made wtih invalid method', () => {
@@ -1176,6 +1346,31 @@ describe('/api', () => {
           .expect(400)
           .then(({ body: { message } }) => {
             expect(message).to.equal('NOT NULL VIOLATION');
+          });
+      });
+      it('ERROR 400 if username already exists', () => {
+        return request(app)
+          .post('/api/users')
+          .send({
+            username: 'butter_bridge',
+            name: 'huw'
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('NOT UNIQUE');
+          });
+      });
+      it('ERROR 400 if avatar_url not an url', () => {
+        return request(app)
+          .post('/api/users')
+          .send({
+            username: 'huw',
+            name: 'huw',
+            avatar_url: 6
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).to.equal('INVALID AVATAR URL');
           });
       });
     });
