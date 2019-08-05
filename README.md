@@ -25,9 +25,9 @@ This is an API for interacting with my Northcoders news app. The database is PSQ
 
 * The following dependencies are provided for you:
 
-  * (express ^4.17.1)[https://expressjs.com/en/api.html]
-  * (knex ^0.19.0)[https://knexjs.org/]
-  * (pg ^7.11.0)[https://node-postgres.com/]
+  * [express ^4.17.1](https://expressjs.com/en/api.html)
+  * [knex ^0.19.0](https://knexjs.org/)
+  * [pg ^7.11.0](https://node-postgres.com/)
 
   So you can go ahead and run
   ```bash
@@ -102,10 +102,10 @@ This is an API for interacting with my Northcoders news app. The database is PSQ
 
 * If you want to run the existing tests you will firsts need the follwing developer dependencies:
 
-  * (chai ^4.2.0)[https://www.chaijs.com/api/bdd/]
-  * (chai-sorted ^0.2.0)[https://www.npmjs.com/package/chai-sorted]
-  * (mocha ^6.1.4)[https://mochajs.org/]
-  * (supertest ^4.0.2)[https://www.npmjs.com/package/supertest]
+  * [chai ^4.2.0](https://www.chaijs.com/api/bdd/)
+  * [chai-sorted ^0.2.0](https://www.npmjs.com/package/chai-sorted)
+  * [mocha ^6.1.4](https://mochajs.org/)
+  * [supertest ^4.0.2](https://www.npmjs.com/package/supertest)
 
   ```bash
     npm install chai chai-sorted mocha supertest -D
