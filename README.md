@@ -141,18 +141,14 @@ This is an API for interacting with my Northcoders news app. The database is PSQ
 
     npm runmigrate-down-up
   ```
-## Hosting
-  There are a couple of previously unlisted scripts available to you that have been created specifically for hosting:
-
-  * To start your server (needed if hosting - see below):
+* To start your server
   ```bash
     npm start
   ```
-  * To seed a production database:
+* Useful for seeding a production database hosted on heroku:
   ```bash
     npm run seed:prod
   ```
-  Please see hosting.md for instructions on hosting your app and database on heroku.
 
 ## Current Endpoints
   For a full list of endpoints including example requests and responses please [click here](https://nc-news-huw.herokuapp.com/api)
